@@ -19,8 +19,8 @@ npm run start   // run the server
 ```
 
 # Usage
-Open GlueDesktop, access the 'autoArrangeApp'
-The application allows the following configurations for the autoArrangement:
+Open GlueDesktop, access the 'autoArrangeApp'  
+The application allows the following configurations for the autoArrangement:  
 
 **Applications to ignore:** This is a list of applications that will not be included in the autoArrange (the application manager should be included in this list)  
 
