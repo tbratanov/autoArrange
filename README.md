@@ -33,6 +33,6 @@ The application allows the following configurations for the autoArrangement:
 **Display toolbar** This allows for the toolbar to be displayed if such is present in its maximized state  
 
 **Auto Arrange Applications** This button arranges the applications  
-```
+
 **Restore bounds** This button restores the application bounds, state, groups to the best available proximity  
-```
+
