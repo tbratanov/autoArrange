@@ -30,9 +30,9 @@ The application allows the following configurations for the autoArrangement:
 
 **Add frame buttons for bounds swap:** This option allows for a frame button to be added to all windows that are being arranged, this button allows for a quick swap of 'locations' of windows within the arrangement  
 
-**Display toolbar** This allows for the toolbar to be displayed if such is present in its maximized state  
+**Display toolbar:** This allows for the toolbar to be displayed if such is present in its maximized state  
 
-**Auto Arrange Applications** This button arranges the applications  
+**Auto Arrange Applications:** This button arranges the applications  
 
-**Restore bounds** This button restores the application bounds, state, groups to the best available proximity  
+**Restore bounds:** This button restores the application bounds, state, groups to the best available proximity  
 
