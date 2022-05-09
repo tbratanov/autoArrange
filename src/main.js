@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 async function handleDOMReady() {
     await populateMonitors();
+    await checkMLP();
     const addButton = document.querySelector('#addToIgnoreList');
     addButton.addEventListener("click", populateIgnoreList);
     const autoArrangeButton = document.querySelector('#autoArrange');
@@ -38,8 +39,15 @@ async function populateMonitors() {
     });
     monitorDropDown.innerHTML = `<option>All</option>${monitorsHTML}`;
 }
+async function checkMLP() {
+    const glue = await initGlue();
+    if (glue.windows.list().filter(w => w.name === 'toolbar-launchpad').length > 0) {
+        const div = document.querySelector('#MLPToolbar');
+        div.style.display = 'block';
+    }
+}
 async function autoArrangeApps() {
-    let displayOnMonitor = document.querySelector('#screens').value;
+    const displayOnMonitor = document.querySelector('#screens').value;
     const onlyNormal = document.querySelector('#onlyNormal').checked;
     const frameButtons = document.querySelector('#addFrameButtons').checked;
     const displayToolbar = document.querySelector('#mlpToolbar').checked;
@@ -47,10 +55,12 @@ async function autoArrangeApps() {
     if (displayToolbar) {
         appManager = 'toolbar-launchpad';
     }
-    if (displayOnMonitor === 'All') {
-        displayOnMonitor = null;
+    try {
+        state = await autoArrange({ ignoreList: ignoreList, onlyNormal: onlyNormal, screen: displayOnMonitor, addFrameButtons: frameButtons, appManagerName: appManager });
     }
-    state = await autoArrange({ ignoreList: ignoreList, onlyNormal: onlyNormal, screen: parseInt(displayOnMonitor), addFrameButtons: frameButtons, appManagerName: appManager });
+    catch (error) {
+        console.warn(error);
+    }
     const restoreBoundsButt = document.querySelector('#restoreBoundsButton');
     restoreBoundsButt.className = 'btn btn-primary';
 }

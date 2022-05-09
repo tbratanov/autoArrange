@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function handleDOMReady() {
     await populateMonitors();
+    await checkMLP();
     const addButton = document.querySelector('#addToIgnoreList');
     addButton.addEventListener("click", populateIgnoreList)
     const autoArrangeButton = document.querySelector('#autoArrange')
@@ -20,6 +21,8 @@ const ignoreList = [
 ];
 
 let state;
+
+
 
 function populateIgnoreList() {
     const ignoreInput = (<HTMLInputElement>document.querySelector('#ignoreApps'));
@@ -46,8 +49,16 @@ async function populateMonitors() {
     monitorDropDown.innerHTML = `<option>All</option>${monitorsHTML}`;
 }
 
+async function checkMLP () {
+    const glue = await initGlue();
+    if(glue.windows.list().filter(w => w.name === 'toolbar-launchpad').length > 0) {
+        const div: HTMLDivElement = document.querySelector('#MLPToolbar');
+        div.style.display = 'block';
+    }
+}
+
 async function autoArrangeApps() {
-    let displayOnMonitor = (<HTMLInputElement>document.querySelector('#screens')).value;
+    const displayOnMonitor = (<HTMLSelectElement>document.querySelector('#screens')).value;
     const onlyNormal = (<HTMLInputElement>document.querySelector('#onlyNormal')).checked;
     const frameButtons = (<HTMLInputElement>document.querySelector('#addFrameButtons')).checked;
     const displayToolbar = (<HTMLInputElement>document.querySelector('#mlpToolbar')).checked;
@@ -57,11 +68,12 @@ async function autoArrangeApps() {
         appManager = 'toolbar-launchpad'
     }
 
-    if (displayOnMonitor === 'All') {
-        displayOnMonitor = undefined;
+    try { 
+        state = await autoArrange({ ignoreList: ignoreList, onlyNormal: onlyNormal, screen: displayOnMonitor, addFrameButtons: frameButtons, appManagerName: appManager }) 
+    } catch (error) {
+        console.warn(error)
     }
-
-    state = await autoArrange({ ignoreList: ignoreList, onlyNormal: onlyNormal, screen: parseInt(displayOnMonitor), addFrameButtons: frameButtons, appManagerName: appManager })
+    
     const restoreBoundsButt = document.querySelector('#restoreBoundsButton')
     restoreBoundsButt.className = 'btn btn-primary';
 }

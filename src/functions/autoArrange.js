@@ -16,8 +16,8 @@ function getWindows({ ignoreList, onlyNormal, screen }) {
         visible = visible.filter(w => w.state !== undefined);
         visible = visible.filter(w => w.state.toLowerCase() === 'normal');
     }
-    if (screen != undefined) {
-        visible = visible.filter(w => w.screen.id === screen);
+    if (screen !== 'All') {
+        visible = visible.filter(w => w.screen.id === parseInt(screen));
     }
     return visible;
 }
@@ -165,7 +165,12 @@ export async function autoArrange({ ignoreList, addFrameButtons, onlyNormal, scr
             groupInfo
         });
         if (win.mode === 'tab') {
-            if (windows.filter(w => w.tabGroupId === win.tabGroupId).length === 0) {
+            if (win.tabGroupId) {
+                if (windows.filter(w => w.tabGroupId === win.tabGroupId).length === 0) {
+                    windows.push(win);
+                }
+            }
+            else {
                 windows.push(win);
             }
         }
