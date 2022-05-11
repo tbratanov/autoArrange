@@ -49,14 +49,13 @@ async function checkMLP() {
 async function autoArrangeApps() {
     const displayOnMonitor = document.querySelector('#screens').value;
     const onlyNormal = document.querySelector('#onlyNormal').checked;
-    const frameButtons = document.querySelector('#addFrameButtons').checked;
     const displayToolbar = document.querySelector('#mlpToolbar').checked;
     let appManager;
     if (displayToolbar) {
         appManager = 'toolbar-launchpad';
     }
     try {
-        state = await autoArrange({ ignoreList: ignoreList, onlyNormal: onlyNormal, screen: displayOnMonitor, addFrameButtons: frameButtons, appManagerName: appManager });
+        state = await autoArrange({ ignoreList: ignoreList, onlyNormal: onlyNormal, screen: displayOnMonitor, appManagerName: appManager });
     }
     catch (error) {
         console.warn(error);

@@ -36,9 +36,15 @@ function splitWindows(array, expectedGroupSize) {
 }
 
 async function arrangeWindows(windows, monitorBounds) {
+
+    await Promise.all(windows.map(async (window) => {
+        await window.setSticky(false);
+        await window.hide();
+    }));
+
     let expectedBounds;
     if (windows.length === 1) {
-        windows[0].moveResize({ left: monitorBounds.left, top: monitorBounds.top, width: monitorBounds.width, height: monitorBounds.height })
+        await windows[0].moveResize({ left: monitorBounds.left, top: monitorBounds.top, width: monitorBounds.width, height: monitorBounds.height })
     }
     else if (windows.length % 3 === 0) {
         const columns = splitWindows(windows, 3);
@@ -50,14 +56,13 @@ async function arrangeWindows(windows, monitorBounds) {
         };
         for (const column of columns) {
             for (const win of column) {
-                win.moveResize({
+                await win.moveResize({
                     top: expectedBounds.top,
                     left: expectedBounds.left,
                     width: expectedBounds.width,
                     height: expectedBounds.height
                 });
                 expectedBounds.left = expectedBounds.left + expectedBounds.width;
-                win.focus();
             }
             expectedBounds.top = expectedBounds.top + expectedBounds.height;
             expectedBounds.left = monitorBounds.left;
@@ -75,14 +80,13 @@ async function arrangeWindows(windows, monitorBounds) {
         for (const row of rows) {
             for (const win of row) {
 
-                win.moveResize({
+                await win.moveResize({
                     top: expectedBounds.top,
                     left: expectedBounds.left,
                     width: expectedBounds.width,
                     height: expectedBounds.height
                 });
                 expectedBounds.left = expectedBounds.left + expectedBounds.width;
-                win.focus();
             }
             expectedBounds.top = expectedBounds.top + expectedBounds.height;
             expectedBounds.left = monitorBounds.left;
@@ -95,7 +99,6 @@ async function arrangeWindows(windows, monitorBounds) {
             height: monitorBounds.height,
             width: monitorBounds.width / 3
         });
-        firstWin.focus();
         windows.shift();
         const firstWinBounds = firstWin.bounds;
 
@@ -110,41 +113,31 @@ async function arrangeWindows(windows, monitorBounds) {
         for (const row of rows) {
             for (const win of row) {
 
-                win.moveResize({
+                await win.moveResize({
                     top: expectedBounds.top,
                     left: expectedBounds.left,
                     width: expectedBounds.width,
                     height: expectedBounds.height
                 });
                 expectedBounds.left = expectedBounds.left + expectedBounds.width;
-                win.focus();
             }
             expectedBounds.top = expectedBounds.top + expectedBounds.height;
             expectedBounds.left = firstWinBounds.width;
         }
+        windows.unshift(firstWin);
+    }
+
+    for (const win of windows) {
+        win.show();
+        win.setSticky(true);
     }
 }
 
-async function addFrameButton(window) {
-
-    const icon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAAdgAAAHYBTnsmCAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAFySURBVDiNxZA9LENhFIaf813R9jYGgxiIkBjQsPgbLMRCE2IyW5gYSGq2S+w2q01IWotgEPEXCcEiSMSgm0i/tjdxj0HLdTsw8U4n7/ne5zvnwH9LykXd9N4d0BJoeBgGs6uDhwCJTK63qO7FbVKKQYAJ1C3BhkK1Ko0A7Rk776scRcR2hScwYSOsRCbXi7ICiK9y3Ja2jx3p3OivAbmoewnslNZKCZwqsloBEPAqxvN972FICu5bbBxl2Tisi+oaUF9+U/X1XIYQbQiGa2KF7WfgbEwssAjQmtaso3agAlA70eO9ibsZvPIz0DqXjrzmoyO+MdUALxv7iMpTBcCIHDhqJxNb+XPf6Kzrx5bOxsS+5qMjvpgNNLicekDk2w0UsioypY5OIqSsk99s3tVo+edvcfj0zFehM0C3wnLJGo4XbGc4HNYn4DoZz9wk3SYj2gcowsLVaPzkJ0BV2CiqexER218OfxxMveDYwP1P4L/TOwCoibyux1ORAAAAAElFTkSuQmCC"
-
-    const buttonInfo = {
-        buttonId: "swapBounds",
-        tooltip: "swap-bounds",
-        order: 1,
-        imageBase64: icon
-    };
-
-    await window.addFrameButton(buttonInfo);
-}
-
-export async function autoArrange({ ignoreList, addFrameButtons, onlyNormal, screen, appManagerName }) {
+export async function autoArrange({ ignoreList, onlyNormal, screen, appManagerName }) {
 
     const filteredWindows = getWindows({ ignoreList, onlyNormal, screen });
     const windows = [];
     const state = [];
-    let swapBoundsArr = [];
 
     filteredWindows.forEach((win) => {
         let groupInfo;
@@ -175,6 +168,7 @@ export async function autoArrange({ ignoreList, addFrameButtons, onlyNormal, scr
             win,
             bounds: win.bounds,
             state: win.state,
+            isSticky: win.isSticky,
             groupInfo
         })
 
@@ -200,25 +194,7 @@ export async function autoArrange({ ignoreList, addFrameButtons, onlyNormal, scr
         if (window.state !== 'normal') {
             await window.restore();
         }
-
         displays[window.screen.id].windows.push(window)
-        if (addFrameButtons) {
-            await addFrameButton(window);
-            const clickHandler = (button) => {
-                if (button.buttonId === "swapBounds") {
-                    swapBoundsArr.push({
-                        win: window,
-                        oldBounds: window.bounds
-                    });
-                    if (swapBoundsArr.length === 2) {
-                        swapBoundsArr[0].win.moveResize(swapBoundsArr[1].oldBounds)
-                        swapBoundsArr[1].win.moveResize(swapBoundsArr[0].oldBounds)
-                        swapBoundsArr = [];
-                    }
-                }
-            };
-            window.onFrameButtonClicked(clickHandler);
-        }
     }
     for (const display of displays) {
         if (appManagerName) {
@@ -246,12 +222,13 @@ export async function autoArrange({ ignoreList, addFrameButtons, onlyNormal, scr
 
 export async function restoreBounds(state) {
 
+    await Promise.all(state.map(async (stateObj) => {
+        await stateObj.win.hide();
+        await stateObj.win.setSticky(false);
+    }));
+
     for (const stateObj of state) {
         await stateObj.win.moveResize(stateObj.bounds);
-        const buttonID = "swapBounds";
-        if (stateObj.win.frameButtons.filter(a => a.buttonId === buttonID).length > 0) {
-            await stateObj.win.removeFrameButton(buttonID);
-        }
     }
     for (const stateObj of state) {
         if (stateObj.groupInfo) {
@@ -272,9 +249,16 @@ export async function restoreBounds(state) {
             stateObj.win.minimize();
         }
     }
+
+    state.forEach((obj) => {
+        obj.win.show();
+        if(obj.isSticky) {
+            obj.win.setSticky(true);
+        }
+    })
 }
 
 // -- Example --
 // const toolbarName = 'toolbar-launchpad'
-// const static = await autoArrange({ignoreList: [toolbarName], onlyNormal: true, screen: 0, addFrameButtons: true, appManagerName: toolbarName});
+// const static = await autoArrange({ignoreList: [toolbarName], onlyNormal: true, screen: 'All', appManagerName: toolbarName});
 // restoreBounds(static);

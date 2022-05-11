@@ -60,7 +60,6 @@ async function checkMLP () {
 async function autoArrangeApps() {
     const displayOnMonitor = (<HTMLSelectElement>document.querySelector('#screens')).value;
     const onlyNormal = (<HTMLInputElement>document.querySelector('#onlyNormal')).checked;
-    const frameButtons = (<HTMLInputElement>document.querySelector('#addFrameButtons')).checked;
     const displayToolbar = (<HTMLInputElement>document.querySelector('#mlpToolbar')).checked;
 
     let appManager;
@@ -69,7 +68,7 @@ async function autoArrangeApps() {
     }
 
     try { 
-        state = await autoArrange({ ignoreList: ignoreList, onlyNormal: onlyNormal, screen: displayOnMonitor, addFrameButtons: frameButtons, appManagerName: appManager }) 
+        state = await autoArrange({ ignoreList: ignoreList, onlyNormal: onlyNormal, screen: displayOnMonitor, appManagerName: appManager }) 
     } catch (error) {
         console.warn(error)
     }
