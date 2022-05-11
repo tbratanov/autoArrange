@@ -31,7 +31,11 @@ function splitWindows(array, expectedGroupSize) {
     return rows;
 }
 async function arrangeWindows(windows, monitorBounds) {
+    const stickyWins = [];
     await Promise.all(windows.map(async (window) => {
+        if (window.isSticky) {
+            stickyWins.push(window);
+        }
         await window.setSticky(false);
         await window.hide();
     }));
@@ -119,6 +123,8 @@ async function arrangeWindows(windows, monitorBounds) {
     }
     for (const win of windows) {
         win.show();
+    }
+    for (const win of stickyWins) {
         win.setSticky(true);
     }
 }
