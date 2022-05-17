@@ -1,6 +1,6 @@
 # Auto Arrange Application
 An auto arrange application, utilizing Glue Desktop API calls to arrange windows
-
+![autoArrange3](https://user-images.githubusercontent.com/57191890/168752264-db065686-9516-4c30-9c4d-8a66a9f14f95.gif)
 # Glue App Config
 In order to use the autoArrange Application with GlueDesktop, copy and paste the 'autoArrange.json' configuration in the %localappdata%\Tick42\GlueDesktop\config\apps folder
 
